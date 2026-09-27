@@ -11,7 +11,8 @@ REGISTERED_TOPIC=$(cast keccak "Registered(uint256,string,address)")
 set -a; source "$ROOT/contracts/.env"; set +a
 
 [ -n "$(cast code $REGISTRY --rpc-url "$BSC_TESTNET_RPC" | sed 's/^0x//')" ] || { echo "registry has no code on this chain — keep ERC-8004 as roadmap"; exit 1; }
-RCPT=$(cast send $REGISTRY "register(string)" "$URI" --private-key "$AGENT_PK" --rpc-url "$BSC_TESTNET_RPC" --json)
+RCPT=$(cast send $REGISTRY "register(string)" "$URI" --private-key "$AGENT_PK" --rpc-url "$BSC_TESTNET_RPC" \
+  --legacy --gas-price "${GAS_PRICE:-200000000}" --json)
 TX=$(echo "$RCPT" | jq -r .transactionHash)
 ID_HEX=$(echo "$RCPT" | jq -r --arg t "$REGISTERED_TOPIC" '.logs[] | select(.topics[0] == $t) | .topics[1]')
 AGENT_ID=$(cast to-dec "$ID_HEX")
