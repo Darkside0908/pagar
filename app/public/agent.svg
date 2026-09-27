@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="PAGAR agent">
+  <rect width="512" height="512" rx="96" fill="#0F1217"/>
+  <g fill="#F0B90B">
+    <path d="M96 176 L124 136 L152 176 V392 H96 Z"/>
+    <path d="M178 176 L206 136 L234 176 V392 H178 Z"/>
+    <path d="M278 176 L306 136 L334 176 V392 H278 Z"/>
+    <path d="M360 176 L388 136 L416 176 V392 H360 Z"/>
+    <rect x="72" y="224" width="368" height="28" rx="6"/>
+    <rect x="72" y="316" width="368" height="28" rx="6"/>
+  </g>
+  <circle cx="256" cy="264" r="30" fill="#0F1217"/>
+  <path d="M244 258 v-8 a12 12 0 0 1 24 0 v8 h4 v26 h-32 v-26 z M252 258 h8 v-8 a4 4 0 0 0 -8 0 z" fill="#FF5A4E"/>
+</svg>

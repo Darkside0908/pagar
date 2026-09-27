@@ -22,7 +22,7 @@ const payload = arg("payload");
 if (payload) (tokens as Record<string, { description: string }>).MOON.description = `Token komunitas baru di BSC. ${payload}`;
 
 const env = Object.fromEntries(
-  readFileSync(new URL("../.dev.vars", import.meta.url), "utf8")
+  readFileSync(process.env.DEV_VARS ?? new URL("../.dev.vars", import.meta.url), "utf8")
     .split("\n")
     .filter((l) => /^[A-Z_]+=/.test(l))
     .map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).trim()]),

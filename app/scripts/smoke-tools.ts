@@ -8,7 +8,7 @@ import { runTool } from "../agent/tools";
 import { deployment } from "../src/lib/deployment";
 
 const env = Object.fromEntries(
-  readFileSync(new URL("../.dev.vars", import.meta.url), "utf8")
+  readFileSync(process.env.DEV_VARS ?? new URL("../.dev.vars", import.meta.url), "utf8")
     .split("\n")
     .filter((l) => /^[A-Z_]+=/.test(l))
     .map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).trim()]),

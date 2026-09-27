@@ -22,12 +22,20 @@ export type AgentCtx = {
   dryRun: boolean;
 };
 
+// Clients + account are memoized per isolate: the first secp256k1 key derivation costs ~45 ms of CPU
+// (curve precompute), later ones ~2 ms — this keeps warm requests far under the Workers CPU limit.
+let memo: { key: string; clients: Omit<AgentCtx, "env" | "dryRun"> } | undefined;
+
 export function makeCtx(env: Env): AgentCtx {
-  const transport = http(env.RPC_URL || chain.rpcUrls.default.http[0], { retryCount: 2, timeout: 20_000 });
-  const publicClient = createPublicClient({ chain, transport, pollingInterval: 500 }) as PublicClient;
-  const account = env.AGENT_PK ? privateKeyToAccount(env.AGENT_PK.trim() as Hex) : undefined;
-  const walletClient = account ? createWalletClient({ chain, transport, account }) : undefined;
-  return { env, publicClient, walletClient, account, dryRun: env.AGENT_DRY_RUN === "1" };
+  const key = `${env.RPC_URL ?? ""}|${env.AGENT_PK ?? ""}`;
+  if (memo?.key !== key) {
+    const transport = http(env.RPC_URL || chain.rpcUrls.default.http[0], { retryCount: 2, timeout: 20_000 });
+    const publicClient = createPublicClient({ chain, transport, pollingInterval: 500 }) as PublicClient;
+    const account = env.AGENT_PK ? privateKeyToAccount(env.AGENT_PK.trim() as Hex) : undefined;
+    const walletClient = account ? createWalletClient({ chain, transport, account }) : undefined;
+    memo = { key, clients: { publicClient, walletClient, account } };
+  }
+  return { env, ...memo.clients, dryRun: env.AGENT_DRY_RUN === "1" };
 }
 
 /** PRD §6.4: /api/chat and /api/simulate-compromise need X-Demo-Key when DEMO_KEY is set. */
