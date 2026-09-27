@@ -3,7 +3,8 @@ import { errorMessage, type AgentCtx } from "./env";
 import { SYSTEM_PROMPT } from "./prompt";
 import { runTool, TOOL_DEFS } from "./tools";
 
-type ToolCall = { id: string; type: "function"; function: { name: string; arguments: string } };
+// `arguments` is a JSON string per the OpenAI spec; a few compatible providers send an object.
+type ToolCall = { id: string; type: "function"; function: { name: string; arguments: string | Record<string, unknown> } };
 type Msg =
   | { role: "system" | "user"; content: string }
   | { role: "assistant"; content: string | null; tool_calls?: ToolCall[] }
@@ -43,9 +44,10 @@ export async function runAgent(ctx: AgentCtx, history: ChatTurn[], emit: (e: Age
 
     for (const call of calls) {
       const name = call.function.name;
+      const raw = call.function.arguments;
       let args: Record<string, unknown> = {};
       try {
-        args = JSON.parse(call.function.arguments || "{}");
+        args = typeof raw === "string" ? JSON.parse(raw || "{}") : (raw ?? {});
       } catch {
         args = {};
       }

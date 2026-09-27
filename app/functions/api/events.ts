@@ -14,8 +14,14 @@ const EVENTS = [
 ];
 
 // GET /api/events — recent vault history through the server's dedicated RPC, for browsers whose
-// public RPC refuses eth_getLogs (PRD §7). Read-only; no demo key needed.
-export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
+// public RPC refuses eth_getLogs (PRD §7). Read-only; no demo key needed. Cached for a few seconds
+// at the edge so a public endpoint cannot burn the dedicated RPC quota.
+export const onRequestGet: PagesFunction<Env> = async ({ request, env, waitUntil }) => {
+  const cache = (caches as unknown as { default: Cache }).default;
+  const key = new Request(new URL(request.url).origin + "/api/events", { method: "GET" });
+  const hit = await cache.match(key);
+  if (hit) return hit;
+
   const { publicClient } = makeCtx(env);
   try {
     const latest = await publicClient.getBlockNumber();
@@ -27,10 +33,12 @@ export const onRequestGet: PagesFunction<Env> = async ({ env }) => {
       const end = start + LOG_CHUNK - 1n > latest ? latest : start + LOG_CHUNK - 1n;
       logs.push(...(await publicClient.getLogs({ address: deployment.vault, events: EVENTS, fromBlock: start, toBlock: end })));
     }
-    return Response.json(
+    const res = Response.json(
       { latest: latest.toString(), actions: actionsFromLogs(logs, deployment.vault) },
-      { headers: { "cache-control": "public, max-age=3" } },
+      { headers: { "cache-control": "public, max-age=5" } },
     );
+    waitUntil(cache.put(key, res.clone()));
+    return res;
   } catch (e) {
     return Response.json({ error: errorMessage(e) }, { status: 502 });
   }

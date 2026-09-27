@@ -12,7 +12,8 @@
     "sync": "node scripts/sync-deployment.mjs",
     "abi": "node scripts/gen-abi.mjs",
     "deploy": "npm run build && wrangler pages deploy dist --project-name pagar",
-    "agent:dry": "node scripts/agent-dry-run.mjs"
+    "tune": "bun scripts/tune-injection.ts",
+    "smoke": "bun scripts/smoke-tools.ts"
   },
   "dependencies": {
     "react": "19.3.0",
