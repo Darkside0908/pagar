@@ -1,0 +1,22 @@
+# Server-only secrets for Cloudflare Pages Functions. Copy to .dev.vars (gitignored).
+# Production: npx wrangler pages secret put <NAME> --project-name pagar
+
+# Dedicated RPC recommended (server only, never shipped to the browser bundle)
+RPC_URL=https://bsc-testnet-rpc.publicnode.com
+# Agent hot key: pays gas only, never holds user funds
+AGENT_PK=0x...
+# Required X-Demo-Key header for /api/chat and /api/simulate-compromise
+DEMO_KEY=change-me
+# 1 = propose* tools return their arguments instead of sending transactions
+AGENT_DRY_RUN=0
+
+# Any OpenAI-compatible chat-completions endpoint with tool calling:
+#   OpenAI      https://api.openai.com/v1                               gpt-4o-mini
+#   Gemini      https://generativelanguage.googleapis.com/v1beta/openai  gemini-2.5-flash
+#   Groq        https://api.groq.com/openai/v1                          llama-3.3-70b-versatile
+#   OpenRouter  https://openrouter.ai/api/v1                            openai/gpt-4o-mini
+LLM_BASE_URL=https://api.openai.com/v1
+LLM_API_KEY=
+LLM_MODEL=gpt-4o-mini
+# Set to "omit" for models that reject the temperature parameter
+LLM_TEMPERATURE=0

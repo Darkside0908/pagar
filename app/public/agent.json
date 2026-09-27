@@ -1,0 +1,12 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "PAGAR Agent",
+  "description": "AI agent yang hanya bisa mengusulkan aksi ke PagarVault di BSC Testnet. Kontrak yang memutuskan; setiap penolakan tercatat on-chain.",
+  "image": "https://pagar.pages.dev/agent.svg",
+  "services": [{ "name": "web", "endpoint": "https://pagar.pages.dev/" }],
+  "x402Support": false,
+  "active": true,
+  "registrations": [
+    { "agentId": 0, "agentRegistry": "eip155:97:0x8004A818BFB912233c491871b3d84c89A494BD9e" }
+  ]
+}
