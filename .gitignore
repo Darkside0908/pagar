@@ -4,3 +4,5 @@ competition_konteks.md
 pagar-contracts-ref.zip
 node_modules/
 .DS_Store
+# local screenshots
+/*.png

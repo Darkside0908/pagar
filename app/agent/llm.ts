@@ -14,6 +14,28 @@ const MAX_STEPS = 8;
 
 export const llmModel = (ctx: AgentCtx) => ctx.env.LLM_MODEL || "gpt-4o-mini";
 
+const MAX_RETRIES = 3;
+const MAX_WAIT_MS = 20_000;
+
+/** POST with retries on 429 / 5xx — free LLM tiers rate-limit tokens per minute. */
+async function completion(url: string, key: string, body: Record<string, unknown>): Promise<Response> {
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) return res;
+    const text = await res.text();
+    const retryable = res.status === 429 || res.status >= 500;
+    if (!retryable || attempt >= MAX_RETRIES) throw new Error(`LLM HTTP ${res.status}: ${text.slice(0, 400)}`);
+    // Honour Retry-After or the provider's "try again in 7.5s" hint, else back off exponentially.
+    const hinted = Number(res.headers.get("retry-after")) || Number(text.match(/try again in ([\d.]+)s/i)?.[1]);
+    const waitMs = Math.min(MAX_WAIT_MS, hinted ? hinted * 1000 + 250 : 2_000 * 2 ** attempt);
+    await new Promise((r) => setTimeout(r, waitMs));
+  }
+}
+
 /** Tool-calling loop against any OpenAI-compatible /chat/completions endpoint. */
 export async function runAgent(ctx: AgentCtx, history: ChatTurn[], emit: (e: AgentEvent) => Promise<void>) {
   const { env } = ctx;
@@ -25,12 +47,7 @@ export async function runAgent(ctx: AgentCtx, history: ChatTurn[], emit: (e: Age
     const body: Record<string, unknown> = { model: llmModel(ctx), messages, tools: TOOL_DEFS, tool_choice: "auto" };
     if ((env.LLM_TEMPERATURE ?? "0") !== "omit") body.temperature = Number(env.LLM_TEMPERATURE ?? 0);
 
-    const res = await fetch(`${base}/chat/completions`, {
-      method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${env.LLM_API_KEY}` },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error(`LLM HTTP ${res.status}: ${(await res.text()).slice(0, 400)}`);
+    const res = await completion(`${base}/chat/completions`, env.LLM_API_KEY, body);
     const data = (await res.json()) as { choices?: { message?: { content?: string | null; tool_calls?: ToolCall[] } }[] };
     const msg = data.choices?.[0]?.message;
     if (!msg) throw new Error("LLM returned no message");
