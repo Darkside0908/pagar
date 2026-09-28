@@ -117,8 +117,8 @@ agent demo sengaja naif dan `tokens.json` mensimulasikan feed eksternal · R2–
 
 ## Anggota tim
 
-- `TODO` — Lane A: smart contract (Foundry/Solidity)
-- `TODO` — Lane B: agent + dashboard (TypeScript)
+- Muhammad Ghani Nurramdhan
+- Gempar Cahyo Nugroho
 
 ## Checklist panitia
 
