@@ -17,7 +17,7 @@ attack becomes a public, queryable record.
 | | |
 |---|---|
 | 🎬 Demo video | _TODO: YouTube link_ |
-| 🖥️ Live dashboard | _TODO: https://pagar.pages.dev_ |
+| 🖥️ Live dashboard | _TODO: https://pagar-4mj.pages.dev_ |
 | 📑 Pitch deck | _TODO: deck link_ |
 | 📜 Vault (verified) | _TODO: BscScan link_ |
 | 🪪 Agent identity | _TODO: ERC-8004 agentId + registration tx_ |
