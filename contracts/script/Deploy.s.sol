@@ -34,7 +34,8 @@ contract Deploy is Script {
             owner, vm.envAddress("AGENT"), vm.envAddress("PROTOCOL_ADMIN"), vm.envAddress("TREASURY"), 10
         );
 
-        vault.setLimit(address(0), 0.1 ether, 0.3 ether);
+        // BNB limits default to PRD §4.9 (0.1 / tx, 0.3 / day); scale down with BNB_MAX_TX / BNB_DAILY when tBNB is scarce
+        vault.setLimit(address(0), vm.envOr("BNB_MAX_TX", uint256(0.1 ether)), vm.envOr("BNB_DAILY", uint256(0.3 ether)));
         vault.setLimit(address(musdt), 50e18, 150e18);
         vault.setMaxSlippageBps(300);
         vault.setAllowedCall(address(router), SEL_SWAP, true);
@@ -61,6 +62,7 @@ contract Deploy is Script {
         vm.serializeAddress(o, "alice", vm.envAddress("ALICE"));
         vm.serializeAddress(o, "bob", vm.envAddress("BOB"));
         vm.serializeAddress(o, "bad", vm.envOr("BAD", address(0)));
+        vm.serializeString(o, "demoSwapBnb", vm.envOr("DEMO_SWAP_BNB", string("0.05")));
         string memory json = vm.serializeUint(o, "deployBlock", startBlock);
         vm.writeJson(json, string.concat("deployments/", vm.toString(block.chainid), ".json"));
     }

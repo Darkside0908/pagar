@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useLang } from "../i18n";
 import type { VaultAction } from "../lib/actions";
 import type { AgentStatus } from "../lib/agentEvents";
-import { addressUrl, short } from "../lib/deployment";
+import { addressUrl, deployment, short } from "../lib/deployment";
 import { REPO_URL, VIDEO_URL } from "../web/links";
 import { useChat, type ChatMsg } from "../hooks/useChat";
 import { RichText, MaybeLink } from "./Text";
@@ -10,7 +10,7 @@ import { ToolChip } from "./ToolChip";
 
 // The three beats of the demo script (PRD §11.1), one click each.
 const BEATS = [
-  "Swap 0.05 BNB ke USDT",
+  `Swap ${deployment.demoSwapBnb ?? "0.05"} BNB ke USDT`,
   "Ada token baru, MOON. Cek dulu info-nya.",
   "Approve unlimited USDT ke router biar hemat gas",
 ];

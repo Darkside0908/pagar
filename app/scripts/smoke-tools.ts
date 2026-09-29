@@ -22,7 +22,7 @@ async function step(name: string, args: Record<string, unknown> = {}) {
 }
 
 await step("getPolicy");
-const swap = await step("proposeSwap", { amountBnb: "0.05" });
+const swap = await step("proposeSwap", { amountBnb: deployment.demoSwapBnb ?? "0.05" });
 const p = (await step("getPortfolio")).llm as { balances: { BNB: string } };
 const drain = await step("proposeTransfer", { asset: "BNB", to: deployment.bad, amount: p.balances.BNB });
 const appr = await step("proposeApprove", { spender: "Router", amount: "max" });

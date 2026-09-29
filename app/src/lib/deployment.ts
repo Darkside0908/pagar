@@ -15,6 +15,7 @@ export type Deployment = {
   bob: Address;
   bad: Address;
   deployBlock: number;
+  demoSwapBnb?: string; // BNB amount for the happy-path demo beat
   agentId?: number;
   agentRegistrationTx?: Hex;
   demoTxs?: Hex[];
