@@ -1,0 +1,23 @@
+{
+  "name": "pagar-video",
+  "private": true,
+  "version": "1.0.0",
+  "description": "PAGAR — 60-second motion film (Remotion)",
+  "scripts": {
+    "studio": "remotion studio",
+    "score": "python3 scripts/score.py",
+    "render": "remotion render Pagar out/pagar-60s.mp4",
+    "stills": "node scripts/stills.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.530",
+    "@remotion/google-fonts": "4.0.530",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "remotion": "4.0.530"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "typescript": "5.9.3"
+  }
+}
