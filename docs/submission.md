@@ -18,8 +18,8 @@ berinteraksi secara mandiri di blockchain". PAGAR membuat otonomi itu aman.
 
 ## Alamat kontrak (BSC Testnet, chainId 97)
 
-- PagarVault: `TODO` (verified di BscScan)
-- MockUSDT: `TODO` · MockRouter: `TODO`
+- PagarVault: `0x131C88833e5e76639A9142CeDcdC70B5A38f742B` (verified: https://testnet.bscscan.com/address/0x131C88833e5e76639A9142CeDcdC70B5A38f742B#code)
+- MockUSDT: `0x32132AF8051FBb7BdfDfbE5D975e455eb8bB6681` · MockRouter: `0xDcbEf167c549cd41c932530B196F2a3c7e6DDe51`
 
 ## Problem statement
 
@@ -91,15 +91,15 @@ Konsekuensinya teruji: kirim seluruh saldo ke `0xbad…` keluar **4**, approve u
 - Gas: `propose` yang di-block ≈ 46–63 ribu gas; swap yang dieksekusi ≈ 206 ribu gas.
 - Agent: 6 tool (getPortfolio, getPolicy, getTokenInfo, proposeSwap, proposeTransfer, proposeApprove), tool calling
   OpenAI-compatible, `propose` langsung tanpa simulate supaya proposal yang di-block tetap mendarat on-chain.
-- Identitas agent terdaftar di Identity Registry ERC-8004 resmi: agentId `TODO` (tx `TODO`).
+- Identitas agent terdaftar di Identity Registry ERC-8004 resmi: agentId `2527` (tx https://testnet.bscscan.com/tx/0x25c546996ebc15e9681bf2dffdf43d84945a0179daa2af282b1a93bac9723ece).
 
 ### Transaksi demo
 
 | Beat | Hasil | Tx |
 |---|---|---|
-| Swap 0.05 BNB → mUSDT | Executed, fee 0.00005 BNB | `TODO` |
-| Injeksi via data token: kirim seluruh saldo ke `0xbad…` | Blocked · RECIPIENT_NOT_ALLOWED | `TODO` |
-| Approve unlimited USDT ke router | Blocked · UNLIMITED_APPROVAL | `TODO` |
+| Swap 0.01 BNB → mUSDT | Executed, fee 0.00001 BNB | https://testnet.bscscan.com/tx/0x8e71a26fe498feb655683b9c9ccbe9151eed2e46b122e4573f241fbf72e3f219 |
+| Injeksi via data token: kirim seluruh saldo (0.06999 BNB) ke `0xbad…` | Blocked · RECIPIENT_NOT_ALLOWED | https://testnet.bscscan.com/tx/0xfa2605f157af2817224ea52343ad5496f641f5d22e9a50ee89cfe30f0c969530 |
+| Approve unlimited USDT ke router | Blocked · UNLIMITED_APPROVAL | https://testnet.bscscan.com/tx/0x83857eafc12970a8791bbf16df565e17e256d3fa9f10c217c36a1ed5a538a744 |
 
 ### Keterbatasan
 
@@ -111,9 +111,9 @@ agent demo sengaja naif dan `tokens.json` mensimulasikan feed eksternal · R2–
 
 - Repo: https://github.com/Darkside0908/pagar
 - Video demo (YouTube, ≤ 5 menit, public/unlisted): `TODO`
-- Dashboard live: `TODO`
+- Dashboard live: https://pagar-4mj.pages.dev
 - Pitch deck: `TODO` (export PDF dari deck)
-- Registrasi ERC-8004: `TODO`
+- Registrasi ERC-8004: https://testnet.bscscan.com/tx/0x25c546996ebc15e9681bf2dffdf43d84945a0179daa2af282b1a93bac9723ece
 
 ## Anggota tim
 
