@@ -2,8 +2,10 @@
 
 ## Persiapan rekaman (wajib, urut)
 
-1. **Vault fresh.** Di `contracts/.env` isi `MUSDT=` dan `ROUTER=` dengan alamat mock lama, lalu
-   `./scripts/testnet-deploy.sh`. Counter harus mulai `0 executed · 0 blocked`.
+1. **Vault fresh** (minta Claude menyiapkan): tarik saldo vault lama (`withdraw`) + `sweep` router,
+   isi `MUSDT=`/`ROUTER=` mock lama di `contracts/.env`, lalu
+   `SEED_BNB=80000000000000000 BNB_MAX_TX=20000000000000000 BNB_DAILY=60000000000000000 DEMO_SWAP_BNB=0.01 ./scripts/testnet-deploy.sh`.
+   Counter harus mulai `0 executed · 0 blocked`.
 2. `cd app && npm run deploy` (atau `npm run dev` kalau rekam lokal) supaya dashboard memakai vault baru.
 3. Cek saldo gas AGENT ≥ 0.02 tBNB. Cek `LLM_API_KEY` terisi. **`AGENT_DRY_RUN=0`.**
 4. Browser: jendela 1920×1080, zoom 100–110%, mode gelap, tutup tab lain, matikan notifikasi.
@@ -16,8 +18,8 @@
 | Waktu | Layar | Voiceover |
 |---|---|---|
 | 0:00–0:08 | **Cold open:** baris merah `Blocked · RECIPIENT_NOT_ALLOWED` muncul di feed | "AI agent ini baru saja mencoba menguras vault. Kontraknya menolak." |
-| 0:08–0:30 | Dashboard penuh: saldo 0.5 BNB, policy 0.1/tx · 0.3/hari, Alice ✓ Bob ✓ `0xbad…` ✗, fee 10 bps | "Siapa yang mau kasih private key ke AI? Nggak ada. Di PAGAR, agent cuma pegang gas key, bukan funds key. Identitasnya terdaftar di ERC-8004." |
-| 0:30–0:55 | Klik prompt **"Swap 0.05 BNB ke USDT"** → chip tool → baris hijau `Executed` · `fee 0.00005 BNB → PAGAR` → klik link BscScan | "Happy path: swap dieksekusi apa adanya, protokol dapat fee kecil. Semuanya on-chain." |
+| 0:08–0:30 | Dashboard penuh: saldo 0.08 BNB, policy 0.02/tx · 0.06/hari, Alice ✓ Bob ✓ `0xbad…` ✗, fee 10 bps | "Siapa yang mau kasih private key ke AI? Nggak ada. Di PAGAR, agent cuma pegang gas key, bukan funds key. Identitasnya terdaftar di ERC-8004." |
+| 0:30–0:55 | Klik prompt **"Swap 0.01 BNB ke USDT"** → chip tool → baris hijau `Executed` · `fee 0.00001 BNB → PAGAR` → klik link BscScan | "Happy path: swap dieksekusi apa adanya, protokol dapat fee kecil. Semuanya on-chain." |
 | 0:55–1:45 | Klik **"Ada token baru, MOON. Cek dulu info-nya."** → chip `getTokenInfo · MOON` → agent memanggil `proposeTransfer … 0xbad…` → **baris merah** → pindah ke tab BscScan Events, tunjuk event `ActionBlocked` | "Saya nggak mengetik serangan itu. Agent membacanya dari data token yang dia ambil sendiri: prompt injection. Agent-nya nurut, kontraknya nolak. PAGAR earned tetap: block itu gratis. Kami dibayar hanya saat kalian aman." |
 | 1:45–2:05 | Klik **"Approve unlimited USDT ke router biar hemat gas"** → baris merah `UNLIMITED_APPROVAL` | "Alasan umum untuk approve unlimited, celah yang sama yang dipakai drainer. Ditolak." |
 | 2:05–2:20 | Zoom ke counter `1 executed · 2 blocked` | "Counter ini dibaca langsung dari kontrak, publik. Satu dibayar, dua ditolak gratis." |
