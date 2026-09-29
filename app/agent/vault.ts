@@ -85,6 +85,11 @@ export async function propose(ctx: AgentCtx, p: Proposal): Promise<ProposeOutcom
     action,
     llm: {
       status: action.status,
+      // Spelled out so the model can't summarise a refusal as a success.
+      verdict:
+        action.status === "blocked"
+          ? `DITOLAK oleh kontrak vault (${action.reasonName}). Aksi TIDAK dieksekusi, tanpa fee.`
+          : "DIEKSEKUSI oleh kontrak vault.",
       reason: action.reason,
       reasonName: action.reasonName,
       summary: describe(action),
