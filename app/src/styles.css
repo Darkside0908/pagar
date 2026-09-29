@@ -12,7 +12,7 @@
   --text: #efeee7;
   --text-2: #cbcac0;
   --muted: #929186;
-  --dim: #66655c;
+  --dim: #86857c; /* ≥ 4.5:1 on every panel tone */
 
   --brand: #f0b90b;
   --brand-ink: #171100;
@@ -355,16 +355,6 @@ a.badge:hover {
   text-transform: uppercase;
   color: var(--text-2);
   white-space: nowrap;
-}
-.panel-title .idx {
-  color: var(--brand);
-  font-weight: 800;
-}
-.panel-title .idx::after {
-  content: "/";
-  margin-left: 10px;
-  color: var(--dim);
-  font-weight: 400;
 }
 
 .btn {
@@ -748,58 +738,140 @@ mark.bad-addr {
   font: inherit;
 }
 
+/* read-only visitors get the claim, then a ledger of links to verify it on-chain */
 .locked {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 14px;
-  padding: 28px 26px;
+  gap: 16px;
+  padding: 24px 24px 20px;
 }
-.locked-mark {
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  border: 1px solid rgba(240, 185, 11, 0.4);
-  background: var(--brand-soft);
+.locked > * {
+  flex-shrink: 0; /* scroll the panel instead of clipping the evidence list */
+}
+.eyebrow {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: 600 11px var(--f-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: var(--brand);
 }
-.locked h3 {
+.eyebrow::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(240, 185, 11, 0.45), transparent);
+}
+.locked-title {
   margin: 0;
-  font: 800 34px/0.95 var(--f-display);
-  letter-spacing: 0.04em;
+  font: 900 clamp(34px, 2.8vw, 54px) / 0.92 var(--f-display);
+  letter-spacing: 0.01em;
   text-transform: uppercase;
+}
+.locked-title span {
+  display: block;
+}
+.locked-title span:last-child {
+  color: var(--brand);
 }
 .locked-body {
   margin: 0;
   color: var(--text-2);
-  max-width: 44ch;
+  font-size: 14.5px;
+  max-width: 46ch;
 }
-.how {
+.proof {
   list-style: none;
-  counter-reset: how;
-  margin: 4px 0;
+  margin: 2px 0 0;
   padding: 0;
-  display: grid;
-  gap: 10px;
+  border: 1px solid var(--line-hi);
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
 }
-.how li {
-  counter-increment: how;
+.proof li + li {
+  border-top: 1px solid var(--line);
+}
+.proof-item {
   display: grid;
-  grid-template-columns: 30px 1fr;
-  gap: 8px;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 50px;
+  padding: 9px 14px;
   color: var(--text-2);
-  font-size: 14px;
+  text-decoration: none;
+  transition: background 0.15s;
 }
-.how li::before {
-  content: counter(how, decimal-leading-zero);
-  font: 700 11.5px var(--f-mono);
+a.proof-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+a.proof-item:hover .proof-ref {
   color: var(--brand);
-  padding-top: 3px;
+}
+.proof-mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+.proof-item.code .proof-mark {
+  border: 2px solid var(--brand);
+}
+.proof-item.executed .proof-mark {
+  background: var(--ok);
+}
+.proof-item.blocked .proof-mark {
+  background: var(--block);
+  box-shadow: 0 0 10px rgba(255, 45, 72, 0.7);
+}
+.proof-item.id .proof-mark {
+  border: 2px solid var(--steel);
+  border-radius: 50%;
+}
+.proof-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.proof-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+.proof-item.executed .proof-title,
+.proof-item.blocked .proof-title {
+  font: 700 12px var(--f-mono);
+  letter-spacing: 0.01em;
+}
+.proof-item.executed .proof-title {
+  color: var(--ok);
+}
+.proof-item.blocked .proof-title {
+  color: var(--block-hi);
+}
+.proof-detail {
+  font-size: 13px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.proof-ref {
+  font: 11px var(--f-mono);
+  color: var(--muted);
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.proof-pending {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--muted);
 }
 .locked-links {
   display: flex;
@@ -807,9 +879,21 @@ mark.bad-addr {
   flex-wrap: wrap;
 }
 .keyform {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line-hi);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.keyform label {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.keyrow {
   display: flex;
   gap: 8px;
-  max-width: 420px;
+  max-width: 440px;
 }
 
 /* ------------------------------------------------------------------ policy (02) */
@@ -932,6 +1016,8 @@ mark.bad-addr {
   font-weight: 600;
   font-size: 14px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .allow-row code {
   font-size: 10.5px;
@@ -1117,8 +1203,25 @@ mark.bad-addr {
   text-align: right;
 }
 .feed-links .note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font: 10.5px var(--f-mono);
   color: var(--dim);
+}
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.live i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 3px rgba(82, 212, 142, 0.16);
 }
 
 .feed-list {
@@ -1131,6 +1234,22 @@ mark.bad-addr {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+.feed-end {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  font: 10.5px var(--f-mono);
+  letter-spacing: 0.04em;
+  color: var(--dim);
+  flex-shrink: 0;
+}
+.feed-end::before,
+.feed-end::after {
+  content: "";
+  flex: 1;
+  border-top: 1px dashed var(--line-hi);
 }
 .feed-empty {
   margin: auto;
@@ -1194,20 +1313,24 @@ mark.bad-addr {
   border: 1px dashed rgba(158, 174, 192, 0.55);
 }
 
-/* executed: calm, one line + the fee that pays PAGAR */
-.row.executed,
-.row.reverted {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+.row-head {
+  display: flex;
   align-items: center;
-  gap: 4px 14px;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+/* executed: calm — sentence, the fence it passed, and the fee that pays PAGAR */
+.row.executed .sentence,
+.row.reverted .sentence {
+  flex: 1 1 14rem;
+  min-width: 0;
 }
 .row.executed .sentence {
   font-size: 16px;
   color: var(--text);
 }
 .fee-line {
-  grid-column: 2 / -1;
   margin: 0;
   font: 11.5px var(--f-mono);
   color: var(--brand);
@@ -1254,12 +1377,6 @@ mark.bad-addr {
   transform-origin: 0 50%;
   background: repeating-linear-gradient(135deg, var(--block) 0 12px, #f5efe6 12px 24px);
 }
-.row.blocked .row-head {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-}
 .reason {
   font: 800 21px var(--f-mono);
   font-stretch: 92%;
@@ -1285,6 +1402,99 @@ mark.bad-addr {
 .row-foot .sep {
   margin: 0 8px;
   opacity: 0.5;
+}
+
+/* decision trace — the fence a proposal walked through, stopping at the gate that refused it */
+.trace {
+  list-style: none;
+  margin: 10px 0 8px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 6px;
+  font: 500 11px var(--f-mono);
+  letter-spacing: 0.01em;
+}
+.row.executed .trace {
+  margin: 9px 0 6px;
+}
+.gate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+.gate:not(:first-child)::before {
+  content: "";
+  width: 14px;
+  margin: 0 7px;
+  border-top: 1px solid rgba(238, 237, 230, 0.24);
+}
+.picket {
+  flex-shrink: 0;
+  fill: currentColor;
+}
+.gate.pass .picket {
+  fill: var(--ok);
+}
+.gate.fail::before {
+  border-top-color: var(--block);
+}
+.gate.fail .picket {
+  fill: var(--block);
+  filter: drop-shadow(0 0 5px rgba(255, 45, 72, 0.9));
+}
+.gate.fail .gname {
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--block);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 14px rgba(255, 45, 72, 0.45);
+}
+.gate.idle {
+  color: var(--dim);
+}
+.gate.idle::before {
+  border-top-style: dashed;
+  border-top-color: rgba(238, 237, 230, 0.18);
+}
+.gate.idle .picket {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+}
+.gate.end {
+  color: var(--brand);
+  font-weight: 700;
+}
+.gate.end::before {
+  border-top-color: rgba(240, 185, 11, 0.6);
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+/* a fresh row replays the decision: gates light up in order, the refusing one lands last */
+.row.fresh .gate {
+  animation: gate-in 0.3s ease-out both;
+  animation-delay: calc(0.35s + var(--i) * 0.09s);
+}
+@keyframes gate-in {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* entrance: the row drops in, flashes red, and the boom-gate barrier swings shut */
@@ -1353,7 +1563,7 @@ mark.bad-addr {
   }
   .allow-row code,
   .agent-badge .addr,
-  .feed-links .note {
+  .feed-links .note-txt {
     display: none;
   }
   .counter .num {
@@ -1373,6 +1583,91 @@ mark.bad-addr {
   }
   .row.executed .sentence {
     font-size: 17px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .chat:has(.locked) {
+    height: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+  .badges {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+  .lang {
+    margin-left: auto;
+  }
+  .badge.fee {
+    white-space: normal;
+  }
+  .grid {
+    padding: 12px;
+    gap: 12px;
+  }
+  .right {
+    gap: 12px;
+  }
+  .locked {
+    padding: 20px 16px 18px;
+  }
+  .locked-title {
+    font-size: 34px;
+  }
+  .policy-grid {
+    grid-template-columns: 1fr;
+  }
+  .pcell,
+  .pcell:nth-child(2),
+  .pcell:nth-child(3) {
+    display: flex;
+    grid-column: auto;
+    border-right: 0;
+    border-top: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .pcell:last-child {
+    border-bottom: 0;
+  }
+  .feed-head {
+    padding: 12px 14px;
+  }
+  .feed-links {
+    width: 100%;
+    margin-left: 0;
+    align-items: flex-start;
+    text-align: left;
+  }
+  .feed-list {
+    padding: 10px;
+  }
+  .row.blocked {
+    padding: 16px 14px 13px 20px;
+  }
+  .reason {
+    font-size: 17px;
+  }
+  .row.blocked .sentence {
+    font-size: 16.5px;
+  }
+  /* wrapped traces read better as loose pickets than as a broken chain */
+  .trace {
+    column-gap: 12px;
+  }
+  .gate:not(:first-child)::before {
+    display: none;
+  }
+  .proof-detail {
+    white-space: normal;
   }
 }
 

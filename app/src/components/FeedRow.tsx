@@ -3,8 +3,10 @@ import { describe, feeText, touchesBad } from "../lib/actions";
 import { short, txUrl } from "../lib/deployment";
 import { timeAgo } from "../lib/format";
 import { REASON_HINTS, type ReasonName } from "../lib/reasons";
+import { traceOf } from "../lib/trace";
 import type { FeedRow as Row } from "../hooks/useFeed";
 import { HighlightBad, MaybeLink } from "./Text";
+import { Trace } from "./Trace";
 
 function Meta({ row, time }: { row: Row; time?: number }) {
   const { t, lang } = useLang();
@@ -26,11 +28,13 @@ function Meta({ row, time }: { row: Row; time?: number }) {
 export function FeedRow({ row, time }: { row: Row; time?: number; now: number }) {
   const { t, lang } = useLang();
   const sentence = describe(row);
+  const steps = traceOf(row);
+  const fresh = row.fresh ? " fresh" : "";
 
   if (row.status === "blocked") {
     const hint = REASON_HINTS[row.reasonName as ReasonName]?.[lang] ?? "";
     return (
-      <li className={`row blocked${row.fresh ? " fresh" : ""}${touchesBad(row) ? " bad" : ""}`}>
+      <li className={`row blocked${fresh}${touchesBad(row) ? " bad" : ""}`}>
         <span className="barrier" aria-hidden="true" />
         <div className="row-head">
           <span className="chip block">Blocked</span>
@@ -42,6 +46,7 @@ export function FeedRow({ row, time }: { row: Row; time?: number; now: number })
         <p className="sentence">
           <HighlightBad text={sentence} />
         </p>
+        {steps && <Trace steps={steps} />}
         <p className="row-foot">
           {hint}
           <span className="sep">·</span>
@@ -56,10 +61,13 @@ export function FeedRow({ row, time }: { row: Row; time?: number; now: number })
   if (row.status === "executed") {
     const fee = feeText(row);
     return (
-      <li className={`row executed${row.fresh ? " fresh" : ""}`}>
-        <span className="chip ok">Executed</span>
-        <p className="sentence">{sentence}</p>
-        <Meta row={row} time={time} />
+      <li className={`row executed${fresh}`}>
+        <div className="row-head">
+          <span className="chip ok">Executed</span>
+          <p className="sentence">{sentence}</p>
+          <Meta row={row} time={time} />
+        </div>
+        {steps && <Trace steps={steps} executed />}
         {fee && <p className="fee-line">{fee}</p>}
       </li>
     );
@@ -67,13 +75,15 @@ export function FeedRow({ row, time }: { row: Row; time?: number; now: number })
 
   // "reverted": gas estimation failed, so no transaction and no event exist (PRD §6.2).
   return (
-    <li className={`row reverted${row.fresh ? " fresh" : ""}`}>
-      <span className="chip rev">{row.status === "dry-run" ? "Dry-run" : "Reverted"}</span>
-      <p className="sentence">
-        <HighlightBad text={sentence} />
-        {row.error && <code className="rev-err">{row.error}</code>}
-      </p>
-      <Meta row={row} time={time} />
+    <li className={`row reverted${fresh}`}>
+      <div className="row-head">
+        <span className="chip rev">{row.status === "dry-run" ? "Dry-run" : "Reverted"}</span>
+        <p className="sentence">
+          <HighlightBad text={sentence} />
+          {row.error && <code className="rev-err">{row.error}</code>}
+        </p>
+        <Meta row={row} time={time} />
+      </div>
       {!row.txHash && <p className="fee-line muted">{t("noTx")}</p>}
     </li>
   );

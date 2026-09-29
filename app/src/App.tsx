@@ -25,7 +25,13 @@ export function App() {
         </div>
       )}
       <main className="grid">
-        <ChatPanel demoKey={demoKey} setDemoKey={setDemoKey} status={status} onAction={feed.push} />
+        <ChatPanel
+          demoKey={demoKey}
+          setDemoKey={setDemoKey}
+          status={status}
+          onAction={feed.push}
+          evidence={feed.rows.filter((r) => r.pinned)}
+        />
         <div className="right">
           <PolicyPanel state={vault.state} error={vault.error} onChanged={vault.refresh} />
           <ActivityFeed
@@ -34,6 +40,7 @@ export function App() {
             timeOf={feed.timeOf}
             executed={vault.state?.executed}
             blocked={vault.state?.blocked}
+            block={vault.state?.block}
           />
         </div>
       </main>

@@ -7,6 +7,7 @@ import { deployment, ZERO } from "../lib/deployment";
 type Limit = { maxPerTx: bigint; dailyCap: bigint; remaining: bigint };
 
 export type VaultState = {
+  block: bigint;
   executed: bigint;
   blocked: bigint;
   feeBps: number;
@@ -27,7 +28,7 @@ async function readVault(): Promise<VaultState> {
   const [
     executed, blocked, feeBps, maxSlippageBps, frozen, owner,
     limBnb, limUsdt, remBnb, remUsdt, feeBnb, feeUsdt,
-    alice, bob, router, badRecipient, badSpender, balBnb, balUsdt,
+    alice, bob, router, badRecipient, badSpender, balBnb, balUsdt, block,
   ] = await Promise.all([
     publicClient.readContract({ ...vault, functionName: "executedCount" }),
     publicClient.readContract({ ...vault, functionName: "blockedCount" }),
@@ -48,8 +49,10 @@ async function readVault(): Promise<VaultState> {
     publicClient.readContract({ ...vault, functionName: "allowedSpender", args: [d.bad] }),
     publicClient.getBalance({ address: d.vault }),
     publicClient.readContract({ address: d.musdt, abi: erc20Abi, functionName: "balanceOf", args: [d.vault] }),
+    publicClient.getBlockNumber({ cacheTime: 0 }),
   ]);
   return {
+    block,
     executed,
     blocked,
     feeBps: Number(feeBps),

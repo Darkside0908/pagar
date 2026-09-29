@@ -58,10 +58,7 @@ export function PolicyPanel({ state, error, onChanged }: { state: VaultState | n
   return (
     <section className="panel policy" aria-label={t("policyTitle")}>
       <header className="panel-head">
-        <div className="panel-title">
-          <span className="idx">02</span>
-          {t("policyTitle")}
-        </div>
+        <div className="panel-title">{t("policyTitle")}</div>
         {state && <span className={`state-pill ${state.frozen ? "frozen" : "active"}`}>{state.frozen ? t("frozen") : t("active")}</span>}
       </header>
 

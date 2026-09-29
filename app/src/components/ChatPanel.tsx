@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useLang } from "../i18n";
-import type { VaultAction } from "../lib/actions";
+import { describe, type VaultAction } from "../lib/actions";
 import type { AgentStatus } from "../lib/agentEvents";
-import { addressUrl, deployment, short } from "../lib/deployment";
+import { addressUrl, deployment, IS_TESTNET, short, txUrl } from "../lib/deployment";
+import type { FeedRow } from "../hooks/useFeed";
 import { REPO_URL, VIDEO_URL } from "../web/links";
 import { useChat, type ChatMsg } from "../hooks/useChat";
-import { RichText, MaybeLink } from "./Text";
+import { HighlightBad, RichText, MaybeLink } from "./Text";
 import { ToolChip } from "./ToolChip";
 
 // The three beats of the demo script (PRD §11.1), one click each.
@@ -20,9 +21,10 @@ type Props = {
   setDemoKey: (k: string | null) => void;
   status: AgentStatus | null;
   onAction: (a: VaultAction) => void;
+  evidence: FeedRow[]; // pinned demo txs, shown to visitors without a demo key
 };
 
-export function ChatPanel({ demoKey, setDemoKey, status, onAction }: Props) {
+export function ChatPanel({ demoKey, setDemoKey, status, onAction, evidence }: Props) {
   const { t } = useLang();
   const [notice, setNotice] = useState<string | null>(null);
   const onUnauthorized = () => {
@@ -33,16 +35,14 @@ export function ChatPanel({ demoKey, setDemoKey, status, onAction }: Props) {
   return (
     <section className="panel chat" aria-label={t("consoleTitle")}>
       <header className="panel-head">
-        <div className="panel-title">
-          <span className="idx">01</span>
-          {t("consoleTitle")}
-        </div>
+        <div className="panel-title">{t("consoleTitle")}</div>
         <AgentBadge status={status} />
       </header>
       {demoKey ? (
         <Console demoKey={demoKey} onAction={onAction} onUnauthorized={onUnauthorized} onLock={() => setDemoKey(null)} />
       ) : (
         <Locked
+          evidence={evidence}
           notice={notice}
           onUnlock={(k) => {
             setNotice(null);
@@ -219,7 +219,10 @@ function Compromise({
   );
 }
 
-function Locked({ notice, onUnlock, onRejected }: { notice: string | null; onUnlock: (k: string) => void; onRejected: () => void }) {
+type LockedProps = { evidence: FeedRow[]; notice: string | null; onUnlock: (k: string) => void; onRejected: () => void };
+
+/** What a visitor without a demo key sees: the claim, then links to verify every part of it on-chain. */
+function Locked({ evidence, notice, onUnlock, onRejected }: LockedProps) {
   const { t } = useLang();
   const [key, setKey] = useState("");
   const [checking, setChecking] = useState(false);
@@ -246,18 +249,40 @@ function Locked({ notice, onUnlock, onRejected }: { notice: string | null; onUnl
     }
   };
 
+  const d = deployment;
+  const demo = [...evidence].sort((a, b) => Number(a.nonce ?? 0) - Number(b.nonce ?? 0));
+  const pending = (d.demoTxs?.length ?? 0) > demo.length;
+
   return (
     <div className="locked">
-      <div className="locked-mark" aria-hidden="true">
-        <LockIcon />
-      </div>
-      <h3>{t("readOnlyTitle")}</h3>
-      <p className="locked-body">{t("readOnlyBody")}</p>
-      <ol className="how">
-        <li>{t("how1")}</li>
-        <li>{t("how2")}</li>
-        <li>{t("how3")}</li>
-      </ol>
+      <p className="eyebrow">{t("evidenceEyebrow")}</p>
+      <h3 className="locked-title">
+        {t("evidenceTitle")
+          .split(/(?<=\.)\s+/)
+          .map((line) => (
+            <span key={line}>{line}</span>
+          ))}
+      </h3>
+      <p className="locked-body">{t("evidenceBody")}</p>
+
+      <ul className="proof">
+        {IS_TESTNET && <Proof kind="code" title={t("evVault")} hash={d.vault} href={`${addressUrl(d.vault)}#code`} />}
+        {demo.map((r) => (
+          <Proof
+            key={r.id}
+            kind={r.status}
+            title={r.status === "blocked" ? r.reasonName : "Executed"}
+            detail={describe(r)}
+            hash={r.txHash ?? ""}
+            href={r.txHash ? txUrl(r.txHash) : ""}
+          />
+        ))}
+        {pending && <li className="proof-pending">{t("evLoading")}</li>}
+        {d.agentId !== undefined && d.agentRegistrationTx && (
+          <Proof kind="id" title={t("evAgent", { id: d.agentId })} hash={d.agentRegistrationTx} href={txUrl(d.agentRegistrationTx)} />
+        )}
+      </ul>
+
       <div className="locked-links">
         {VIDEO_URL && (
           <a className="btn primary" href={VIDEO_URL} target="_blank" rel="noreferrer">
@@ -268,21 +293,49 @@ function Locked({ notice, onUnlock, onRejected }: { notice: string | null; onUnl
           {t("readCode")} ↗
         </a>
       </div>
+
       <form className="keyform" onSubmit={(e) => void submit(e)}>
-        <input
-          type="password"
-          value={key}
-          onChange={(e) => setKey(e.target.value)}
-          placeholder={t("demoKey")}
-          aria-label={t("demoKey")}
-          autoComplete="off"
-        />
-        <button type="submit" className="btn" disabled={!key.trim() || checking}>
-          {t("unlock")}
-        </button>
+        <label htmlFor="demo-key">{t("keyPrompt")}</label>
+        <div className="keyrow">
+          <input
+            id="demo-key"
+            type="password"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+            placeholder={t("demoKey")}
+            autoComplete="off"
+          />
+          <button type="submit" className="btn" disabled={!key.trim() || checking}>
+            {t("unlock")}
+          </button>
+        </div>
       </form>
       {notice && <p className="err small">{notice}</p>}
     </div>
+  );
+}
+
+type ProofProps = { kind: string; title: string; detail?: string; hash: string; href: string };
+
+function Proof({ kind, title, detail, hash, href }: ProofProps) {
+  return (
+    <li>
+      <MaybeLink className={`proof-item ${kind}`} href={href} title={hash}>
+        <span className="proof-mark" aria-hidden="true" />
+        <span className="proof-text">
+          <span className="proof-title">{title}</span>
+          {detail && (
+            <span className="proof-detail">
+              <HighlightBad text={detail} />
+            </span>
+          )}
+        </span>
+        <span className="proof-ref">
+          <code>{short(hash)}</code>
+          {href && <span aria-hidden="true"> ↗</span>}
+        </span>
+      </MaybeLink>
+    </li>
   );
 }
 
@@ -295,11 +348,3 @@ function KeyIcon() {
   );
 }
 
-function LockIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-      <rect x="4" y="10.5" width="16" height="10.5" rx="2" />
-      <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" strokeLinecap="round" />
-    </svg>
-  );
-}
