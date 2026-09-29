@@ -1,0 +1,31 @@
+{
+  "titleFrames": 60,
+  "recFrames": 1030,
+  "marks": {
+    "public": 0.437,
+    "key": 4.947,
+    "unlocked": 6.827,
+    "swap_click": 8.633,
+    "swap_done": 12.791,
+    "moon_click": 16.297,
+    "moon_done": 21.857,
+    "approve_click": 25.367,
+    "approve_done": 27.76,
+    "final": 31.256,
+    "end": 34.267
+  },
+  "rows": {
+    "swap": 12.633,
+    "moon": 21.833,
+    "approve": 27.4
+  },
+  "txs": {
+    "swap": "https://testnet.bscscan.com/tx/0x5bbdbb903af69b9d68a7529f654fa22a9ef2db56bde3a23a7007d00a22c925bd",
+    "moon": "https://testnet.bscscan.com/tx/0x1293b1edabbedc072c002fd7f10ffb0eae5f510a042750d44a38d6c0e5a3ac26",
+    "approve": "https://testnet.bscscan.com/tx/0xb641b7e01ed8023e59ac662f31078bf6510493d80a1de1aee5ea6d241fb5c100"
+  },
+  "counters": {
+    "before": "1/2",
+    "after": "2/4"
+  }
+}
